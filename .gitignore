@@ -22,3 +22,7 @@ corpora/*
 *.swp
 .idea/
 .vscode/
+
+# MISC
+*.cache
+*.sqlite3

@@ -1,0 +1,11 @@
+<html>
+    <head>
+        <title>TasteSynth Homepage</title>
+    </head>
+    <body>
+        <form method="POST" action="{% url 'spotify_authorization' %}">
+            {% csrf_token %}
+            <button type="submit">Authorize Spotify</button>
+        </form>
+    </body>
+</html>
