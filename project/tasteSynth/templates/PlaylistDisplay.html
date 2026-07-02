@@ -9,21 +9,28 @@
             img:hover  {
                 box-shadow: 0 0 5px 5px white;
             }
-            #amount_selected {
+            #playlist_list {
+                padding-bottom: 12px;
+            }
+            #merge_display {
                 position: fixed;
+                display:"block";
                 top:0;
                 right:0;
-                font-size:20px
+                font-size:20px;
             }
-            div {
-                padding-bottom: 12px;
+            #merge_button {
+                font-size:30px;
             }
         </style>
     </head>
     <body>
-        <p id="amount_selected">0/2</p>
+        <div id = "merge_display">
+            <p id="amount_selected">0 Playlists to Merge</p>
+            <button id = "merge_button" disabled onclick="mergePlaylists()">Merge</button>
+        </div>
         {% for playlist in playlists %}
-        <div>
+        <div id = "playlist_list">
             <a href="{% url 'playlist_view' playlist.id %}">
                 <img src = "{{ playlist.images.0.url }}" width="500" height="500">
             </a>
@@ -34,6 +41,7 @@
         <script>
             var playlists = []
             const selectionDisplay = document.getElementById("amount_selected")
+            const mergeButton = document.getElementById("merge_button")
             function selectPlaylist(id){
                 // Removes an item from the playlists list if it is already present
                 if (playlists.includes(id)){
@@ -42,16 +50,32 @@
                     if (index > -1) {
                     playlists.splice(index, 1);
                     }
-                    selectionDisplay.textContent = playlists.length.toString() + "/2";
-                }
-                else if (playlists.length == 1){
-                    window.location.href = "{% url 'merge_view' %}?first_playlist=" + playlists[0] + "&second_playlist=" + id.toString();
-                    playlists.length = 0
+                    selectionDisplay.textContent = playlists.length.toString() + " Playlists to Merge";
                 }
                 else {
                     playlists.push(id)
-                    selectionDisplay.textContent = playlists.length.toString() + "/2";
+                    selectionDisplay.textContent = playlists.length.toString() + " Playlists to Merge";
                 }
+                if (playlists.length > 1){
+                    mergeButton.disabled = false;
+                }
+                else  {
+                    mergeButton.disabled = true;
+                }
+                // Shows the merge button when the 
+            }
+            function mergePlaylists(){
+                // Displays the number of playlists being merged
+                playlists_string = "?num_of_playlists=" + playlists.length.toString();
+                current_playlist = 1;
+                // Adds each playlist as a query parameter
+                for (const playlist of playlists){
+                    individual_string = "&playlist" + current_playlist.toString() + "=" + playlist.toString();
+                    playlists_string += individual_string;
+                    current_playlist += 1;
+                }
+                window.location.href = "{% url 'merge_view' %}" + playlists_string;
+                playlists.length = 0
             }
         </script>
     </body>

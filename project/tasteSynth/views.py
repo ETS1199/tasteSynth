@@ -50,20 +50,27 @@ def PlaylistView(request,id):
 def MergeView(request):
     auth_token = request.session.get("auth_token")
     sp = spotipy.Spotify(auth=auth_token)
-    playlist_id1 = request.GET["first_playlist"]
-    results1 = sp.playlist_items(playlist_id1,fields="items.item.name,items.item.id,items.item.album.images.url,next")
-    tracks1 = results1['items']
-    while results1['next']:
-        results1 = sp.next(results1)
-        tracks1.extend(results1['items'])
-    playlist_id2 = request.GET["second_playlist"]
-    results2 = sp.playlist_items(playlist_id2,fields="items.item.name,items.item.id,items.item.album.images.url,next")
-    tracks2 = results2['items']
-    while results2['next']:
-        results2 = sp.next(results2)
-        tracks2.extend(results2['items'])
+    # Gets the amount of playlists we are looking at
+    num_of_playlists = int(request.GET["num_of_playlists"])
+    playlists = []
+    for playlist in range(1,num_of_playlists + 1):
+        playlist_id = request.GET["playlist" + str(playlist)]
+        results = sp.playlist_items(playlist_id,fields="items.item.name,items.item.id,items.item.album.images.url,next")
+        tracks = results['items']
+        while results['next']:
+            results = sp.next(results)
+            tracks.extend(results['items'])
+        playlists.append(tracks)
     overlapping_tracks = []
-    for track in tracks1:
-        if track in tracks2:
+    # Gets the playlist with the least songs and removes it from the list to use to find overlapping songs
+    least_song_playlist = min(playlists,key=len)
+    playlists.remove(least_song_playlist)
+    for track in least_song_playlist:
+        track_valid = True
+        for playlist in playlists:
+            if track not in playlist:
+                track_valid = False
+                break
+        if track_valid:
             overlapping_tracks.append(track)
     return render(request, "PlaylistView.html", {"tracks": overlapping_tracks})
