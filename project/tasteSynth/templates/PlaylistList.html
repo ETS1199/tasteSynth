@@ -1,0 +1,237 @@
+<html>
+    <head>
+        <title>Playlist Display</title>
+        <style>
+            :root {
+                --bg: #121212;
+                --surface: #1c1c1e;
+                --surface-hover: #262628;
+                --text-primary: #f5f5f7;
+                --text-secondary: #9a9a9e;
+                --accent: #3ecf8e;
+                --accent-dim: rgba(62, 207, 142, 0.15);
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+
+            html, body {
+                margin: 0;
+                padding: 0;
+                background-color: var(--bg);
+                color: var(--text-primary);
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+            }
+
+            body {
+                padding: 32px 40px 100px;
+            }
+
+            h1.page_title {
+                font-size: 28px;
+                font-weight: 600;
+                letter-spacing: -0.02em;
+                margin: 0 0 28px;
+            }
+
+            .playlist_grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+                gap: 24px;
+            }
+
+            .playlist_card {
+                background-color: var(--surface);
+                border-radius: 12px;
+                padding: 14px;
+                transition: background-color 0.2s ease, transform 0.2s ease;
+            }
+
+            .playlist_card:hover {
+                background-color: var(--surface-hover);
+                transform: translateY(-4px);
+            }
+
+            .art_link {
+                display: block;
+                position: relative;
+                border-radius: 8px;
+                overflow: hidden;
+                aspect-ratio: 1 / 1;
+            }
+
+            .art_link img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: block;
+                transition: transform 0.3s ease, filter 0.3s ease;
+            }
+
+            .playlist_card:hover .art_link img {
+                transform: scale(1.04);
+                filter: brightness(0.85);
+            }
+
+            .playlist_name {
+                margin: 12px 2px 10px;
+                font-size: 15px;
+                font-weight: 500;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .select_button {
+                width: 100%;
+                padding: 9px 0;
+                border-radius: 8px;
+                border: 1px solid #3a3a3c;
+                background-color: transparent;
+                color: var(--text-primary);
+                font-size: 13px;
+                font-weight: 500;
+                cursor: pointer;
+                transition: border-color 0.2s ease, background-color 0.2s ease;
+            }
+
+            .select_button:hover {
+                border-color: var(--accent);
+                background-color: var(--accent-dim);
+            }
+
+            .select_button.selected {
+                background-color: var(--accent);
+                border-color: var(--accent);
+                color: #0a0a0a;
+            }
+
+            #merge_display {
+                position: fixed;
+                bottom: 28px;
+                right: 28px;
+                display: flex;
+                align-items: center;
+                gap: 16px;
+                background-color: var(--surface);
+                border: 1px solid #2e2e30;
+                border-radius: 999px;
+                padding: 10px 12px 10px 22px;
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            }
+
+            #amount_selected {
+                margin: 0;
+                font-size: 14px;
+                color: var(--text-secondary);
+            }
+
+            #merge_button {
+                font-size: 14px;
+                font-weight: 600;
+                padding: 10px 20px;
+                border-radius: 999px;
+                border: none;
+                background-color: var(--accent);
+                color: #0a0a0a;
+                cursor: pointer;
+                transition: opacity 0.2s ease, transform 0.15s ease;
+            }
+
+            #merge_button:hover:not(:disabled) {
+                transform: scale(1.03);
+            }
+
+            #merge_button:disabled {
+                background-color: #3a3a3c;
+                color: var(--text-secondary);
+                cursor: not-allowed;
+            }
+        </style>
+        <script>
+            window.addEventListener("pageshow", (event) => {
+            if (event.persisted) {
+                window.location.reload();
+            }
+            });
+        </script>
+    </head>
+    <body>
+        <div id="merge_display">
+            <p id="amount_selected">0 selected</p>
+            <button id="merge_button" disabled onclick="mergePlaylists()">Merge</button>
+        </div>
+        <h1 class="page_title">Your Playlists</h1>
+        <div class="playlist_grid">
+            {% for playlist in playlists %}
+            <div class="playlist_card" id="playlist_card_{{ playlist.id }}">
+                <a class="art_link" href="{% url 'playlist_view' playlist.id %}">
+                    <img src="{{ playlist.images.0.url }}" alt="{{ playlist.name }}">
+                </a>
+                <p class="playlist_name">{{ playlist.name }}</p>
+                <button class="select_button" id="playlist_button_{{ playlist.id }}" onclick="selectPlaylist('{{ playlist.id }}')">
+                    Select
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+        <h1 class="page_title">Shared Playlists</h1>
+        <div class="playlist_grid">
+            {% for playlist in shared_playlists %}
+            <div class="playlist_card" id="playlist_card_{{ playlist.id }}">
+                <a class="art_link" href="{% url 'playlist_view' playlist.id %}">
+                    <img src="{{ playlist.images.0.url }}" alt="{{ playlist.name }}">
+                </a>
+                <p class="playlist_name">{{ playlist.name }}</p>
+                <button class="select_button" id="playlist_button_{{ playlist.id }}" onclick="selectPlaylist('{{ playlist.id }}')">
+                    Select
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+        <script>
+            var playlists = []
+            const selectionDisplay = document.getElementById("amount_selected")
+            const mergeButton = document.getElementById("merge_button")
+            function selectPlaylist(id){
+                const playlistButton = document.getElementById("playlist_button_" + id.toString());
+                // Removes an item from the playlists list if it is already present
+                if (playlists.includes(id)){
+                    // Gets the index and removes it from the list
+                    const index = playlists.indexOf(id);
+                    if (index > -1) {
+                    playlists.splice(index, 1);
+                    }
+                    selectionDisplay.textContent = playlists.length.toString() + " Playlists to Merge";
+                    playlistButton.style.backgroundColor = "transparent";
+                }
+                else {
+                    playlists.push(id)
+                    selectionDisplay.textContent = playlists.length.toString() + " Playlists to Merge";
+                    playlistButton.style.backgroundColor = "var(--accent)";
+                }
+                if (playlists.length > 1){
+                    mergeButton.disabled = false;
+                }
+                else  {
+                    mergeButton.disabled = true;
+                }
+                // Shows the merge button when the 
+            }
+            function mergePlaylists(){
+                // Displays the number of playlists being merged
+                playlists_string = "?num_of_playlists=" + playlists.length.toString();
+                current_playlist = 1;
+                // Adds each playlist as a query parameter
+                for (const playlist of playlists){
+                    individual_string = "&playlist" + current_playlist.toString() + "=" + playlist.toString();
+                    playlists_string += individual_string;
+                    current_playlist += 1;
+                }
+                window.location.href = "{% url 'merge_view' %}" + playlists_string;
+                playlists.length = 0
+            }
+        </script>
+    </body>
+</html>
