@@ -115,3 +115,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# Optional: If you want to use a global static folder at the project level
+STATICFILES_DIRS = [
+    BASE_DIR / "tasteSynth" / "static", 
+]
