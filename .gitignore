@@ -9,6 +9,10 @@ __pycache__/
 venv/
 env/
 
+# Secrets — keep the real .env local, but commit .env.example
+.env
+!.env.example
+
 # Generated artifacts
 models/
 plots/
