@@ -87,7 +87,11 @@ def MergeView(request):
                 break
         if track_valid:
             overlapping_tracks.append(track)
-    return render(request, "PlaylistView.html", {"tracks": overlapping_tracks,"merged_playlist": True})
+    if len(overlapping_tracks) == 0:
+        empty = True
+    else:
+        empty = False
+    return render(request, "PlaylistView.html", {"tracks": overlapping_tracks,"merged_playlist": True,"empty":empty})
 
 def get_spotify_auth(request):
     cache_handler = DjangoSessionCacheHandler(request)

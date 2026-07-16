@@ -89,7 +89,7 @@
     </head>
     <body>
         <a class="back_link" href="javascript:history.back()">&larr; Back to playlists</a>
-        {% if merged_playlist %}
+        {% if merged_playlist and not empty%}
         <form method="POST" action="{% url 'save_playlist' %}">
             {% csrf_token %}
             <input type="hidden" name="playlist" value="{{ tracks }}">

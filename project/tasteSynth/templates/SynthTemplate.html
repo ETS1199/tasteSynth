@@ -1,11 +1,156 @@
+{% load static %}
+<!DOCTYPE html>
 <html>
     <head>
         <title>TasteSynth Homepage</title>
+        <style>
+            :root {
+                --bg: #121212;
+                --surface: #1c1c1e;
+                --text-primary: #f5f5f7;
+                --text-secondary: #9a9a9e;
+                --accent: #3ecf8e;
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+
+            html, body {
+                margin: 0;
+                padding: 0;
+                background-color: var(--bg);
+                color: var(--text-primary);
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+            }
+
+            body {
+                max-width: 720px;
+                margin: 0 auto;
+                padding: 64px 32px 80px;
+            }
+
+            .hero {
+                margin-bottom: 56px;
+            }
+
+            .hero h1 {
+                font-size: 36px;
+                font-weight: 600;
+                letter-spacing: -0.02em;
+                margin: 0 0 16px;
+            }
+
+            .hero p {
+                font-size: 17px;
+                line-height: 1.6;
+                color: var(--text-secondary);
+                margin: 0 0 28px;
+                max-width: 520px;
+            }
+
+            .auth_button {
+                font-size: 15px;
+                font-weight: 600;
+                padding: 12px 24px;
+                border-radius: 999px;
+                border: none;
+                background-color: var(--accent);
+                color: #0a0a0a;
+                cursor: pointer;
+                transition: transform 0.15s ease;
+            }
+
+            .auth_button:hover {
+                transform: scale(1.03);
+            }
+
+            section {
+                border-top: 1px solid #2e2e30;
+                padding: 36px 0;
+            }
+
+            section h2 {
+                font-size: 20px;
+                font-weight: 600;
+                margin: 0 0 14px;
+            }
+
+            section p {
+                font-size: 15px;
+                line-height: 1.7;
+                color: var(--text-secondary);
+                margin: 0 0 12px;
+            }
+
+            .steps {
+                background-color: var(--surface);
+                border-radius: 12px;
+                padding: 20px 24px;
+                margin-top: 16px;
+            }
+
+            .steps ol {
+                margin: 0;
+                padding-left: 20px;
+            }
+
+            .steps li {
+                font-size: 15px;
+                line-height: 1.7;
+                color: var(--text-secondary);
+                margin-bottom: 8px;
+            }
+
+            .steps li:last-child {
+                margin-bottom: 0;
+            }
+
+            .steps li::marker {
+                color: var(--accent);
+                font-weight: 600;
+            }
+            .step_image {
+                display: block;
+                max-width: 100%;
+                border-radius: 8px;
+                border: 1px solid #2e2e30;
+                margin: 12px 0 4px;
+            }
+        </style>
     </head>
     <body>
-        <form method="POST" action="{% url 'spotify_authorization' %}">
-            {% csrf_token %}
-            <button type="submit">Authorize Spotify</button>
-        </form>
+        <div class="hero">
+            <h1>TasteSynth</h1>
+            <p>Welcome to TasteSynth, the site for finding where your taste in music overlaps with the taste of those around you.</p>
+            <form method="POST" action="{% url 'spotify_authorization' %}">
+                {% csrf_token %}
+                <button class="auth_button" type="submit">Authorize Spotify</button>
+            </form>
+        </div>
+
+        <section>
+            <h2>How we do it</h2>
+            <p>TasteSynth uses the Spotify API to access your playlists and create new synthesized ones with your permission.</p>
+        </section>
+
+        <section>
+            <h2>What you need to do</h2>
+            <p>For each playlist you'd like to synthesize, you need to be either a collaborator or an owner.</p>
+            <p>If you're not a collaborator on the playlist, the owner needs to add you as one:</p>
+            <div class="steps">
+                <ol>
+                    <li>
+                        Open the playlist and click the <strong>...</strong> option.
+                        <img class="step_image" src="{% static 'images/playlist.jpeg' %}" alt="Playlist options menu showing the ... button">
+                    </li>
+                    <li>
+                        Select <strong>Invite collaborators</strong>, which brings up an invite pop-up.
+                        <img class="step_image" src="{% static 'images/popup.jpeg' %}" alt="Invite collaborators pop-up">
+                    </li>
+                    <li>Choose whichever method you like to send the invite from the pop-up.</li>
+                </ol>
+            </div>
+        </section>
     </body>
 </html>
